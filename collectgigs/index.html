@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CollectGigs — Automate Client Acquisition for Service Businesses</title>
+  <meta name="description" content="Stop chasing leads manually. CollectGigs automates and systemizes your client acquisition so you get more jobs and close more deals." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface-2: #1a1a26;
+      --border: #2a2a3a;
+      --text: #e8e8f0;
+      --text-muted: #8888a0;
+      --primary: #6c5ce7;
+      --primary-light: #a29bfe;
+      --accent: #00cec9;
+      --accent-2: #fdcb6e;
+      --danger: #ff6b6b;
+      --radius: 12px;
+      --radius-lg: 20px;
+      --max-w: 1200px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    /* ── Utility ── */
+    .container { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 32px; border-radius: 50px; font-weight: 600;
+      font-size: 1rem; cursor: pointer; border: none;
+      transition: all 0.25s cubic-bezier(.4,0,.2,1);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      color: #fff; box-shadow: 0 4px 24px rgba(108,92,231,.35);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(108,92,231,.5); }
+    .btn-secondary {
+      background: var(--surface-2); color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--primary); background: #1e1e30; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 16px; border-radius: 50px; font-size: .8rem; font-weight: 600;
+      background: rgba(108,92,231,.12); color: var(--primary-light);
+      border: 1px solid rgba(108,92,231,.25);
+    }
+    .section { padding: 100px 0; }
+    .section-label {
+      font-size: .8rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 3px; color: var(--accent); margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem); font-weight: 800;
+      line-height: 1.15; margin-bottom: 20px;
+    }
+    .section-sub {
+      font-size: 1.15rem; color: var(--text-muted); max-width: 600px;
+    }
+
+    /* ── Animated Grid Background ── */
+    .hero-bg {
+      position: fixed; inset: 0; z-index: -1; overflow: hidden;
+    }
+    .hero-bg::before {
+      content: '';
+      position: absolute; inset: -50%;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(108,92,231,.12) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(0,206,201,.08) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(253,203,110,.05) 0%, transparent 40%);
+      animation: bgShift 20s ease-in-out infinite alternate;
+    }
+    @keyframes bgShift {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(-5%, 3%) scale(1.05); }
+    }
+
+    /* ── Nav ── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 16px 0;
+      background: rgba(10,10,15,.8);
+      backdrop-filter: blur(20px) saturate(1.5);
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      transition: all .3s;
+    }
+    .nav.scrolled { background: rgba(10,10,15,.95); }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 1.35rem; font-weight: 800;
+    }
+    .logo-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+    .nav-links { display: flex; align-items: center; gap: 32px; }
+    .nav-links a {
+      font-size: .9rem; color: var(--text-muted); font-weight: 500;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta { display: flex; align-items: center; gap: 12px; }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center;
+      padding-top: 80px; position: relative;
+    }
+    .hero-content { text-align: center; max-width: 800px; margin: 0 auto; }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800;
+      line-height: 1.08; margin-bottom: 24px;
+      background: linear-gradient(135deg, #fff 0%, var(--primary-light) 50%, var(--accent) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: clamp(1.1rem, 2vw, 1.35rem); color: var(--text-muted);
+      max-width: 620px; margin: 0 auto 40px; line-height: 1.7;
+    }
+    .hero-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .hero-stats {
+      display: flex; justify-content: center; gap: 48px;
+      margin-top: 64px; flex-wrap: wrap;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat-value {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--primary-light));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-stat-label { font-size: .85rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── Floating Cards (Hero Visual) ── */
+    .hero-visual {
+      position: relative; margin-top: 80px;
+      max-width: 900px; margin-left: auto; margin-right: auto;
+    }
+    .hero-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent), var(--accent-2));
+    }
+    .pipeline-row {
+      display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .pipeline-col {
+      flex: 1; min-width: 180px;
+      background: var(--surface-2); border-radius: var(--radius);
+      padding: 16px;
+    }
+    .pipeline-col-header {
+      font-size: .75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 2px; margin-bottom: 12px; display: flex;
+      align-items: center; gap: 8px;
+    }
+    .pipeline-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .pipeline-item {
+      background: var(--bg); border-radius: 8px; padding: 10px 12px;
+      margin-bottom: 8px; font-size: .82rem; color: var(--text-muted);
+      border-left: 3px solid var(--border);
+    }
+    .pipeline-item:last-child { margin-bottom: 0; }
+    .pipeline-item.urgent { border-left-color: var(--danger); }
+    .pipeline-item.warm { border-left-color: var(--accent-2); }
+    .pipeline-item.hot { border-left-color: var(--accent); }
+
+    /* ── Pain Section ── */
+    .pain-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px; margin-top: 48px;
+    }
+    .pain-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 32px;
+      transition: all .3s; position: relative; overflow: hidden;
+    }
+    .pain-card::after {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 4px; height: 0; background: var(--danger);
+      transition: height .3s;
+    }
+    .pain-card:hover { border-color: rgba(255,107,107,.3); transform: translateY(-4px); }
+    .pain-card:hover::after { height: 100%; }
+    .pain-icon { font-size: 2rem; margin-bottom: 16px; }
+    .pain-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 10px; }
+    .pain-card p { font-size: .92rem; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── Features ── */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px; margin-top: 48px;
+    }
+    .feature-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 36px;
+      transition: all .35s; position: relative;
+    }
+    .feature-card:hover {
+      border-color: rgba(108,92,231,.4);
+      box-shadow: 0 8px 40px rgba(108,92,231,.12);
+      transform: translateY(-4px);
+    }
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 20px;
+    }
+    .fi-purple { background: rgba(108,92,231,.15); }
+    .fi-teal { background: rgba(0,206,201,.15); }
+    .fi-yellow { background: rgba(253,203,110,.15); }
+    .fi-pink { background: rgba(255,107,107,.15); }
+    .fi-blue { background: rgba(116,185,255,.15); }
+    .fi-green { background: rgba(85,239,196,.15); }
+    .feature-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; }
+    .feature-card p { font-size: .92rem; color: var(--text-muted); line-height: 1.65; }
+
+    /* ── How It Works ── */
+    .steps { margin-top: 56px; display: grid; gap: 0; }
+    .step {
+      display: grid; grid-template-columns: 80px 1fr; gap: 32px;
+      align-items: start; position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: ''; position: absolute; left: 39px; top: 64px;
+      width: 2px; bottom: -24px; background: var(--border);
+    }
+    .step-num {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; font-weight: 800; color: #fff;
+      box-shadow: 0 4px 20px rgba(108,92,231,.3);
+    }
+    .step-content { padding-bottom: 48px; }
+    .step-content h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
+    .step-content p { font-size: .95rem; color: var(--text-muted); max-width: 500px; }
+
+    /* ── Social Proof ── */
+    .proof-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px; margin-top: 48px;
+    }
+    .proof-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 32px;
+    }
+    .proof-stars { color: var(--accent-2); font-size: 1.1rem; margin-bottom: 16px; letter-spacing: 2px; }
+    .proof-card blockquote {
+      font-size: 1rem; line-height: 1.7; color: var(--text);
+      margin-bottom: 20px; font-style: italic;
+    }
+    .proof-author { display: flex; align-items: center; gap: 12px; }
+    .proof-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .9rem;
+    }
+    .proof-name { font-weight: 600; font-size: .9rem; }
+    .proof-role { font-size: .8rem; color: var(--text-muted); }
+
+    /* ── Pricing ── */
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px; margin-top: 56px; align-items: start;
+    }
+    .pricing-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 40px 32px;
+      transition: all .35s; position: relative;
+    }
+    .pricing-card.featured {
+      border-color: var(--primary);
+      box-shadow: 0 0 60px rgba(108,92,231,.15);
+      transform: scale(1.03);
+    }
+    .pricing-card.featured::before {
+      content: 'Most Popular';
+      position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      color: #fff; font-size: .75rem; font-weight: 700; padding: 5px 18px;
+      border-radius: 50px; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .pricing-card:hover { transform: translateY(-4px); }
+    .pricing-card.featured:hover { transform: scale(1.03) translateY(-4px); }
+    .pricing-name { font-size: 1rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
+    .pricing-price {
+      font-size: 3rem; font-weight: 800; margin-bottom: 4px;
+    }
+    .pricing-price span { font-size: 1rem; font-weight: 500; color: var(--text-muted); }
+    .pricing-desc { font-size: .9rem; color: var(--text-muted); margin-bottom: 28px; }
+    .pricing-features { list-style: none; margin-bottom: 32px; }
+    .pricing-features li {
+      padding: 8px 0; font-size: .9rem; color: var(--text-muted);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .pricing-features li::before {
+      content: '✓'; color: var(--accent); font-weight: 700; font-size: .85rem;
+    }
+    .pricing-card .btn { width: 100%; justify-content: center; }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: 100px 0; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, rgba(108,92,231,.15) 0%, transparent 70%);
+    }
+    .cta-section .section-title { max-width: 600px; margin: 0 auto 20px; }
+    .cta-section .section-sub { margin: 0 auto 40px; text-align: center; }
+
+    /* ── Footer ── */
+    .footer {
+      padding: 64px 0 32px;
+      border-top: 1px solid var(--border);
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px; margin-bottom: 48px;
+    }
+    .footer-brand p { color: var(--text-muted); font-size: .9rem; margin-top: 12px; max-width: 280px; }
+    .footer-col h4 { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; color: var(--text-muted); }
+    .footer-col a { display: block; font-size: .9rem; color: var(--text-muted); padding: 4px 0; transition: color .2s; }
+    .footer-col a:hover { color: var(--text); }
+    .footer-bottom {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 24px; border-top: 1px solid var(--border);
+      font-size: .8rem; color: var(--text-muted);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hero-stats { gap: 24px; }
+      .pipeline-row { flex-direction: column; }
+      .step { grid-template-columns: 60px 1fr; gap: 16px; }
+      .step:not(:last-child)::after { left: 29px; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+      .pricing-card.featured { transform: none; }
+      .pricing-card.featured:hover { transform: translateY(-4px); }
+    }
+
+    /* ── Animations ── */
+    .fade-up {
+      opacity: 0; transform: translateY(30px);
+      transition: all 0.7s cubic-bezier(.4,0,.2,1);
+    }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- Background -->
+  <div class="hero-bg"></div>
+
+  <!-- Nav -->
+  <nav class="nav" id="nav">
+    <div class="container nav-inner">
+      <a href="#" class="logo">
+        <div class="logo-icon">⚡</div>
+        <span>CollectGigs</span>
+      </a>
+      <div class="nav-links">
+        <a href="#problems">Problems</a>
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#pricing">Pricing</a>
+      </div>
+      <div class="nav-cta">
+        <a href="#pricing" class="btn btn-primary">Start Free Trial</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="badge fade-up">🚀 Built for service businesses</div>
+        <h1 class="fade-up">Stop Chasing Leads.<br />Start Closing Deals.</h1>
+        <p class="fade-up">CollectGigs automates and systemizes your entire client acquisition pipeline — so you spend less time prospecting and more time getting paid.</p>
+        <div class="hero-actions fade-up">
+          <a href="#pricing" class="btn btn-primary">Get Started Free →</a>
+          <a href="#how-it-works" class="btn btn-secondary">See How It Works</a>
+        </div>
+        <div class="hero-stats fade-up">
+          <div class="hero-stat">
+            <div class="hero-stat-value">3x</div>
+            <div class="hero-stat-label">More Qualified Leads</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">40%</div>
+            <div class="hero-stat-label">Higher Close Rate</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">10hrs</div>
+            <div class="hero-stat-label">Saved Per Week</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pipeline Preview -->
+      <div class="hero-visual fade-up">
+        <div class="hero-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+            <div>
+              <div style="font-weight:700;font-size:1.1rem;">📊 Live Pipeline</div>
+              <div style="font-size:.82rem;color:var(--text-muted);">Your client acquisition at a glance</div>
+            </div>
+            <div class="badge" style="font-size:.7rem;">● 23 Active Prospects</div>
+          </div>
+          <div class="pipeline-row">
+            <div class="pipeline-col">
+              <div class="pipeline-col-header">
+                <span class="pipeline-dot" style="background:var(--text-muted);"></span>
+                New Leads
+              </div>
+              <div class="pipeline-item">Johnson Plumbing — $2,400</div>
+              <div class="pipeline-item">Sarah's Bakery — $1,800</div>
+              <div class="pipeline-item">Metro Dental — $3,200</div>
+            </div>
+            <div class="pipeline-col">
+              <div class="pipeline-col-header">
+                <span class="pipeline-dot" style="background:var(--accent-2);"></span>
+                Contacted
+              </div>
+              <div class="pipeline-item warm">Ace HVAC Services — $5,100</div>
+              <div class="pipeline-item warm">Green Lawn Co — $900</div>
+            </div>
+            <div class="pipeline-col">
+              <div class="pipeline-col-header">
+                <span class="pipeline-dot" style="background:var(--accent);"></span>
+                Proposal Sent
+              </div>
+              <div class="pipeline-item hot">Bright Electric — $4,700</div>
+              <div class="pipeline-item hot">Peak Roofing — $12,000</div>
+            </div>
+            <div class="pipeline-col">
+              <div class="pipeline-col-header">
+                <span class="pipeline-dot" style="background:var(--primary-light);"></span>
+                Won 🎉
+              </div>
+              <div class="pipeline-item" style="border-left-color:var(--primary-light);">Summit Cleaning — $2,100</div>
+              <div class="pipeline-item" style="border-left-color:var(--primary-light);">BlueSky Paint — $6,800</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problems -->
+  <section class="section" id="problems">
+    <div class="container">
+      <div class="fade-up">
+        <div class="section-label">The Problem</div>
+        <h2 class="section-title">Client Acquisition Is Broken<br />for Service Businesses</h2>
+        <p class="section-sub">You're great at what you do. But finding new clients? That's a full-time job you never signed up for.</p>
+      </div>
+      <div class="pain-grid">
+        <div class="pain-card fade-up">
+          <div class="pain-icon">😤</div>
+          <h3>Leads Slip Through the Cracks</h3>
+          <p>You get inquiries from your website, referrals, social media — but they're scattered everywhere. No system, no follow-up, lost revenue.</p>
+        </div>
+        <div class="pain-card fade-up">
+          <div class="pain-icon">⏰</div>
+          <h3>Hours Wasted on Manual Outreach</h3>
+          <p>Copy-pasting emails, chasing callbacks, sending the same intro message 50 times. It's exhausting and it doesn't scale.</p>
+        </div>
+        <div class="pain-card fade-up">
+          <div class="pain-icon">📉</div>
+          <h3>Inconsistent Pipeline</h3>
+          <p>Feast or famine. When you're busy with jobs, prospecting stops. When jobs end, the pipeline is empty. No predictable revenue.</p>
+        </div>
+        <div class="pain-card fade-up">
+          <div class="pain-icon">🤷</div>
+          <h3>No Visibility Into What's Working</h3>
+          <p>Which lead sources convert best? How fast are you following up? Where are deals stalling? You're guessing instead of knowing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section" id="features" style="background:var(--surface);">
+    <div class="container">
+      <div class="fade-up" style="text-align:center;">
+        <div class="section-label">The Solution</div>
+        <h2 class="section-title">Everything You Need to<br />Systemize Client Acquisition</h2>
+        <p class="section-sub" style="margin:0 auto;">One platform that captures, nurtures, and converts leads — so you can focus on delivering great service.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card fade-up">
+          <div class="feature-icon fi-purple">🎯</div>
+          <h3>Smart Lead Capture</h3>
+          <p>Automatically collect leads from your website, social media, Google Business, and referrals — all into one unified inbox. Never miss an opportunity again.</p>
+        </div>
+        <div class="feature-card fade-up">
+          <div class="feature-icon fi-teal">🤖</div>
+          <h3>Automated Follow-Ups</h3>
+          <p>Set up sequences that nurture leads while you work. Personalized emails and texts go out on autopilot — at the perfect time, every time.</p>
+        </div>
+        <div class="feature-card fade-up">
+          <div class="feature-icon fi-yellow">📋</div>
+          <h3>Visual Pipeline</h3>
+          <p>Drag-and-drop deal tracking from first contact to signed contract. See exactly where every prospect stands and what needs attention.</p>
+        </div>
+        <div class="feature-card fade-up">
+          <div class="feature-icon fi-pink">📝</div>
+          <h3>Proposals & Estimates</h3>
+          <p>Create professional proposals in minutes. Clients can review, approve, and sign digitally. Faster decisions, faster revenue.</p>
+        </div>
+        <div class="feature-card fade-up">
+          <div class="feature-icon fi-blue">📊</div>
+          <h3>Analytics & Insights</h3>
+          <p>Know your numbers. Track conversion rates, response times, revenue by source, and pipeline velocity — so you can double down on what works.</p>
+        </div>
+        <div class="feature-card fade-up">
+          <div class="feature-icon fi-green">🔗</div>
+          <h3>Integrations</h3>
+          <p>Connects with your calendar, email, CRM, invoicing tools, and more. CollectGigs fits into your workflow — not the other way around.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="section" id="how-it-works">
+    <div class="container">
+      <div class="fade-up">
+        <div class="section-label">How It Works</div>
+        <h2 class="section-title">Up and Running in 3 Steps</h2>
+        <p class="section-sub">No complicated setup. No consultants needed. Start seeing results in days, not months.</p>
+      </div>
+      <div class="steps">
+        <div class="step fade-up">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h3>Connect Your Lead Sources</h3>
+            <p>Link your website forms, social pages, Google Business profile, and referral channels. CollectGigs centralizes everything automatically.</p>
+          </div>
+        </div>
+        <div class="step fade-up">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h3>Set Up Your Follow-Up Sequences</h3>
+            <p>Use our templates or build custom outreach sequences. Emails, texts, reminders — all personalized and timed for maximum response.</p>
+          </div>
+        </div>
+        <div class="step fade-up">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h3>Watch Your Pipeline Grow</h3>
+            <p>Leads flow in, follow-ups run themselves, and your pipeline fills up. You focus on closing deals and delivering great work.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Social Proof -->
+  <section class="section" style="background:var(--surface);">
+    <div class="container">
+      <div class="fade-up" style="text-align:center;">
+        <div class="section-label">Results</div>
+        <h2 class="section-title">Service Businesses Love CollectGigs</h2>
+      </div>
+      <div class="proof-grid">
+        <div class="proof-card fade-up">
+          <div class="proof-stars">★★★★★</div>
+          <blockquote>"We went from chasing leads on sticky notes to a real pipeline. Closed 40% more jobs in the first quarter. This thing pays for itself."</blockquote>
+          <div class="proof-author">
+            <div class="proof-avatar">MR</div>
+            <div>
+              <div class="proof-name">Mike Rodriguez</div>
+              <div class="proof-role">Owner, Rodriguez Plumbing</div>
+            </div>
+          </div>
+        </div>
+        <div class="proof-card fade-up">
+          <div class="proof-stars">★★★★★</div>
+          <blockquote>"The automated follow-ups alone are worth it. Leads that used to ghost us are now booking estimates. It's like having a sales team I don't have to manage."</blockquote>
+          <div class="proof-author">
+            <div class="proof-avatar">TK</div>
+            <div>
+              <div class="proof-name">Tanya Kim</div>
+              <div class="proof-role">Founder, SparkleClean Co.</div>
+            </div>
+          </div>
+        </div>
+        <div class="proof-card fade-up">
+          <div class="proof-stars">★★★★★</div>
+          <blockquote>"I used to spend 2 hours a day on outreach. Now CollectGigs handles it and I spend that time on actual jobs. Best investment I've made this year."</blockquote>
+          <div class="proof-author">
+            <div class="proof-avatar">DP</div>
+            <div>
+              <div class="proof-name">David Park</div>
+              <div class="proof-role">Owner, Parkside Landscaping</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="section" id="pricing">
+    <div class="container">
+      <div class="fade-up" style="text-align:center;">
+        <div class="section-label">Pricing</div>
+        <h2 class="section-title">Simple Plans That Scale With You</h2>
+        <p class="section-sub" style="margin:0 auto;">Start free. Upgrade when you're ready. No contracts, no surprises.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="pricing-card fade-up">
+          <div class="pricing-name">Starter</div>
+          <div class="pricing-price">$49 <span>/mo</span></div>
+          <div class="pricing-desc">For solo operators getting started with systems.</div>
+          <ul class="pricing-features">
+            <li>Up to 100 active leads</li>
+            <li>3 lead source integrations</li>
+            <li>Basic follow-up sequences</li>
+            <li>Pipeline board</li>
+            <li>Email support</li>
+          </ul>
+          <a href="#" class="btn btn-secondary">Start Free Trial</a>
+        </div>
+        <div class="pricing-card featured fade-up">
+          <div class="pricing-name">Growth</div>
+          <div class="pricing-price">$99 <span>/mo</span></div>
+          <div class="pricing-desc">For growing teams that need automation power.</div>
+          <ul class="pricing-features">
+            <li>Unlimited active leads</li>
+            <li>All integrations</li>
+            <li>Advanced sequences + A/B testing</li>
+            <li>Proposals & e-signatures</li>
+            <li>Analytics dashboard</li>
+            <li>Priority support</li>
+          </ul>
+          <a href="#" class="btn btn-primary">Start Free Trial</a>
+        </div>
+        <div class="pricing-card fade-up">
+          <div class="pricing-name">Scale</div>
+          <div class="pricing-price">$199 <span>/mo</span></div>
+          <div class="pricing-desc">For established businesses ready to dominate.</div>
+          <ul class="pricing-features">
+            <li>Everything in Growth</li>
+            <li>Multi-location support</li>
+            <li>Team permissions & roles</li>
+            <li>Custom integrations & API</li>
+            <li>Dedicated account manager</li>
+            <li>White-label options</li>
+          </ul>
+          <a href="#" class="btn btn-secondary">Start Free Trial</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="fade-up">
+        <h2 class="section-title">Ready to Systemize Your<br />Client Acquisition?</h2>
+        <p class="section-sub" style="margin:0 auto 40px;text-align:center;">Join hundreds of service businesses closing more deals with less effort. Your first 14 days are free.</p>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+          <a href="#pricing" class="btn btn-primary" style="padding:18px 40px;font-size:1.1rem;">Start Your Free Trial →</a>
+        </div>
+        <p style="font-size:.82rem;color:var(--text-muted);margin-top:16px;">No credit card required · Cancel anytime · Setup in 5 minutes</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">
+            <div class="logo-icon">⚡</div>
+            <span>CollectGigs</span>
+          </div>
+          <p>Automate and systemize client acquisition for your service business. Get more jobs, close more deals.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#">Integrations</a>
+          <a href="#">Changelog</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="#">About</a>
+          <a href="#">Blog</a>
+          <a href="#">Careers</a>
+          <a href="#">Contact</a>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <a href="#">Help Center</a>
+          <a href="#">API Docs</a>
+          <a href="#">Status</a>
+          <a href="#">Privacy Policy</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 CollectGigs. All rights reserved.</span>
+        <span>Built for service businesses, by service business people.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Scroll-based nav style
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    // Intersection Observer for fade-up animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  </script>
+</body>
+</html>
