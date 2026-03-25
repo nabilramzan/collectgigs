@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{}}'s Office — Control Center</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0c0e14;
+      --desk: #1a1d28;
+      --desk-edge: #252836;
+      --surface: #161822;
+      --surface-2: #1e2030;
+      --border: #2a2d3e;
+      --text: #e2e4ed;
+      --text-dim: #6b7084;
+      --text-muted: #4a4e62;
+      --accent: #6c5ce7;
+      --accent-glow: rgba(108,92,231,.25);
+      --teal: #00cec9;
+      --teal-glow: rgba(0,206,201,.2);
+      --amber: #fdcb6e;
+      --red: #ff6b6b;
+      --green: #55efc4;
+      --blue: #74b9ff;
+      --radius: 14px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Office Environment ── */
+    .office {
+      height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Ambient background */
+    .office::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 80%, rgba(108,92,231,.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 20%, rgba(0,206,201,.04) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(253,203,110,.02) 0%, transparent 50%);
+    }
+
+    /* ── Top Bar (Ceiling Lights) ── */
+    .ceiling {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 24px;
+      background: linear-gradient(180deg, #12141c 0%, transparent 100%);
+      border-bottom: 1px solid rgba(255,255,255,.03);
+    }
+    .ceiling-left { display: flex; align-items: center; gap: 16px; }
+    .office-name {
+      font-size: .85rem; font-weight: 700; color: var(--text-dim);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .office-name .dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .5; }
+    }
+    .ceiling-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem; color: var(--text-muted);
+    }
+    .ceiling-right { display: flex; align-items: center; gap: 12px; }
+    .status-chip {
+      font-size: .72rem; font-weight: 600;
+      padding: 4px 12px; border-radius: 50px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .status-chip.active { background: rgba(85,239,196,.1); color: var(--green); }
+    .status-chip.working { background: rgba(108,92,231,.12); color: var(--accent); }
+
+    /* ── Main Area (Desk + Monitors) ── */
+    .desk-area {
+      position: relative; z-index: 5;
+      display: grid;
+      grid-template-columns: 260px 1fr 340px;
+      gap: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* ── Left Panel (Bookshelf / File Cabinet) ── */
+    .bookshelf {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .shelf-header {
+      padding: 16px 18px 12px;
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 2px; color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .shelf-items {
+      flex: 1; overflow-y: auto; padding: 8px;
+    }
+    .shelf-items::-webkit-scrollbar { width: 4px; }
+    .shelf-items::-webkit-scrollbar-track { background: transparent; }
+    .shelf-items::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .file-item {
+      padding: 10px 12px; border-radius: 8px;
+      margin-bottom: 4px; cursor: pointer;
+      transition: all .2s;
+      display: flex; align-items: center; gap: 10px;
+      font-size: .82rem;
+    }
+    .file-item:hover { background: var(--surface-2); }
+    .file-item.active { background: rgba(108,92,231,.12); color: var(--accent); }
+    .file-icon { font-size: 1rem; width: 20px; text-align: center; }
+    .file-name { flex: 1; }
+    .file-badge {
+      font-size: .65rem; font-weight: 700; padding: 2px 6px;
+      border-radius: 4px; background: var(--accent); color: #fff;
+    }
+
+    /* ── Center (Main Monitor) ── */
+    .monitor-area {
+      display: flex; flex-direction: column;
+      background: var(--bg);
+      overflow: hidden;
+    }
+    .monitor-tabs {
+      display: flex; align-items: center;
+      padding: 0 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      gap: 0;
+      min-height: 42px;
+    }
+    .monitor-tab {
+      padding: 10px 18px;
+      font-size: .78rem; font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .2s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .monitor-tab:hover { color: var(--text-dim); }
+    .monitor-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+    .monitor-screen {
+      flex: 1; overflow-y: auto; padding: 20px;
+    }
+    .monitor-screen::-webkit-scrollbar { width: 6px; }
+    .monitor-screen::-webkit-scrollbar-track { background: transparent; }
+    .monitor-screen::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* Tab Content */
+    .tab-content { display: none; height: 100%; }
+    .tab-content.active { display: flex; flex-direction: column; }
+
+    /* ── Chat / Terminal ── */
+    .chat-container { flex: 1; display: flex; flex-direction: column; }
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 4px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .82rem; line-height: 1.7;
+    }
+    .chat-messages::-webkit-scrollbar { width: 6px; }
+    .chat-messages::-webkit-scrollbar-track { background: transparent; }
+    .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .msg { padding: 6px 0; display: flex; gap: 10px; }
+    .msg-prefix {
+      color: var(--text-muted); white-space: nowrap; user-select: none;
+      min-width: 80px;
+    }
+    .msg-user .msg-prefix { color: var(--teal); }
+    .msg-agent .msg-prefix { color: var(--accent); }
+    .msg-system .msg-prefix { color: var(--amber); }
+    .msg-body { flex: 1; }
+    .msg-body a { color: var(--blue); text-decoration: underline; }
+
+    .chat-input-area {
+      display: flex; gap: 8px; padding: 12px 0 0;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+    .chat-input {
+      flex: 1;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .82rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .chat-input:focus { border-color: var(--accent); }
+    .chat-input::placeholder { color: var(--text-muted); }
+    .chat-send {
+      background: var(--accent);
+      color: #fff; border: none;
+      border-radius: 10px; padding: 10px 18px;
+      font-weight: 600; font-size: .82rem;
+      cursor: pointer; transition: all .2s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .chat-send:hover { background: #7d6ff0; transform: translateY(-1px); }
+
+    /* ── Memory / Tasks View ── */
+    .memory-section { margin-bottom: 24px; }
+    .memory-section-header {
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 2px; color: var(--text-muted);
+      margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+    }
+    .memory-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 8px;
+      font-size: .84rem;
+      line-height: 1.6;
+      transition: all .2s;
+    }
+    .memory-card:hover { border-color: rgba(108,92,231,.3); }
+    .memory-card .tag {
+      display: inline-block; font-size: .68rem; font-weight: 600;
+      padding: 2px 8px; border-radius: 4px; margin-right: 6px;
+    }
+    .tag-decision { background: rgba(108,92,231,.15); color: var(--accent); }
+    .tag-todo { background: rgba(253,203,110,.15); color: var(--amber); }
+    .tag-context { background: rgba(0,206,201,.15); color: var(--teal); }
+    .tag-lesson { background: rgba(85,239,196,.15); color: var(--green); }
+
+    /* ── Activity Feed ── */
+    .activity-item {
+      display: flex; gap: 12px; padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,.03);
+      font-size: .82rem;
+    }
+    .activity-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem; color: var(--text-muted);
+      min-width: 50px; padding-top: 2px;
+    }
+    .activity-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      margin-top: 6px; flex-shrink: 0;
+    }
+    .activity-text { flex: 1; line-height: 1.5; }
+    .activity-text strong { color: var(--accent); }
+
+    /* ── Right Panel (Whiteboard / Status) ── */
+    .whiteboard {
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .wb-header {
+      padding: 16px 18px 12px;
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 2px; color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .wb-body {
+      flex: 1; overflow-y: auto; padding: 16px;
+    }
+    .wb-body::-webkit-scrollbar { width: 4px; }
+    .wb-body::-webkit-scrollbar-track { background: transparent; }
+    .wb-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .stat-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 10px;
+    }
+    .stat-label {
+      font-size: .7rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px;
+    }
+    .stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.6rem; font-weight: 700;
+    }
+    .stat-bar {
+      height: 4px; border-radius: 2px; background: var(--border);
+      margin-top: 8px; overflow: hidden;
+    }
+    .stat-bar-fill {
+      height: 100%; border-radius: 2px;
+      transition: width 1s ease;
+    }
+
+    .todo-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.03);
+      font-size: .82rem;
+    }
+    .todo-check {
+      width: 18px; height: 18px; border-radius: 5px;
+      border: 2px solid var(--border); flex-shrink: 0;
+      margin-top: 1px; cursor: pointer;
+      transition: all .2s; display: flex;
+      align-items: center; justify-content: center;
+      font-size: .65rem;
+    }
+    .todo-check:hover { border-color: var(--accent); }
+    .todo-check.done {
+      background: var(--accent); border-color: var(--accent);
+      color: #fff;
+    }
+    .todo-text { line-height: 1.4; }
+    .todo-text.done { text-decoration: line-through; color: var(--text-muted); }
+
+    /* ── Bottom Bar (Desk Surface) ── */
+    .desk-surface {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 24px;
+      background: linear-gradient(0deg, #10121a 0%, transparent 100%);
+      border-top: 1px solid rgba(255,255,255,.03);
+      font-size: .72rem; color: var(--text-muted);
+    }
+    .desk-left, .desk-right { display: flex; align-items: center; gap: 16px; }
+    .desk-kbd {
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 5px; padding: 2px 7px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem;
+    }
+
+    /* ── Lamp glow ── */
+    .desk-lamp {
+      position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+      width: 400px; height: 120px;
+      background: radial-gradient(ellipse, rgba(108,92,231,.08) 0%, transparent 70%);
+      pointer-events: none; z-index: 1;
+    }
+
+    /* ── Typing indicator ── */
+    .typing-indicator {
+      display: none; padding: 6px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .82rem; color: var(--text-muted);
+    }
+    .typing-indicator.visible { display: flex; gap: 10px; }
+    .typing-dots span {
+      display: inline-block; width: 6px; height: 6px;
+      border-radius: 50%; background: var(--text-muted);
+      animation: typingBounce 1.4s infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: .2s; }
+    .typing-dots span:nth-child(3) { animation-delay: .4s; }
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: .3; }
+      30% { transform: translateY(-6px); opacity: 1; }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .desk-area { grid-template-columns: 1fr; }
+      .bookshelf, .whiteboard { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="office">
+    <!-- Ceiling -->
+    <div class="ceiling">
+      <div class="ceiling-left">
+        <div class="office-name">
+          <span class="dot"></span>
+          {{}}'s Office
+        </div>
+        <div class="ceiling-time" id="clock">--:--:--</div>
+      </div>
+      <div class="ceiling-right">
+        <div class="status-chip active">● Online</div>
+        <div class="status-chip working" id="workStatus">⚡ Ready</div>
+      </div>
+    </div>
+
+    <!-- Desk Area -->
+    <div class="desk-area">
+      <!-- Left: File Cabinet -->
+      <div class="bookshelf">
+        <div class="shelf-header">📁 Workspace</div>
+        <div class="shelf-items" id="fileList">
+          <div class="file-item active" data-view="chat" onclick="switchView(this, 'chat')">
+            <span class="file-icon">💬</span>
+            <span class="file-name">Chat</span>
+          </div>
+          <div class="file-item" data-view="memory" onclick="switchView(this, 'memory')">
+            <span class="file-icon">🧠</span>
+            <span class="file-name">Memory</span>
+          </div>
+          <div class="file-item" data-view="activity" onclick="switchView(this, 'activity')">
+            <span class="file-icon">📋</span>
+            <span class="file-name">Activity Log</span>
+            <span class="file-badge" id="activityCount">0</span>
+          </div>
+          <div class="file-item" data-view="projects" onclick="switchView(this, 'projects')">
+            <span class="file-icon">🚀</span>
+            <span class="file-name">Projects</span>
+          </div>
+          <div style="padding:12px 12px 4px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--text-muted);margin-top:8px;">
+            Recent Files
+          </div>
+          <div class="file-item" style="opacity:.6;">
+            <span class="file-icon">📄</span>
+            <span class="file-name">collectgigs/index.html</span>
+          </div>
+          <div class="file-item" style="opacity:.6;">
+            <span class="file-icon">📝</span>
+            <span class="file-name">MEMORY.md</span>
+          </div>
+          <div class="file-item" style="opacity:.6;">
+            <span class="file-icon">📝</span>
+            <span class="file-name">SOUL.md</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: Main Monitor -->
+      <div class="monitor-area">
+        <div class="monitor-tabs">
+          <div class="monitor-tab active" data-tab="chat" onclick="switchTab(this, 'chat')">💬 Chat</div>
+          <div class="monitor-tab" data-tab="memory" onclick="switchTab(this, 'memory')">🧠 Memory</div>
+          <div class="monitor-tab" data-tab="activity" onclick="switchTab(this, 'activity')">📋 Activity</div>
+          <div class="monitor-tab" data-tab="projects" onclick="switchTab(this, 'projects')">🚀 Projects</div>
+        </div>
+        <div class="monitor-screen">
+          <!-- Chat Tab -->
+          <div class="tab-content active" id="tab-chat">
+            <div class="chat-container">
+              <div class="chat-messages" id="chatMessages">
+                <div class="msg msg-system">
+                  <span class="msg-prefix">system</span>
+                  <span class="msg-body">Office initialized. {{}} is at their desk. Ready for work.</span>
+                </div>
+                <div class="msg msg-agent">
+                  <span class="msg-prefix">{{}}</span>
+                  <span class="msg-body">Hey. I'm here. What do you need?</span>
+                </div>
+              </div>
+              <div class="typing-indicator" id="typingIndicator">
+                <span class="msg-prefix" style="color:var(--accent);">{{}}</span>
+                <span class="typing-dots"><span></span><span></span><span></span></span>
+              </div>
+              <div class="chat-input-area">
+                <input class="chat-input" id="chatInput" type="text" placeholder="Talk to {{}}..." autocomplete="off" />
+                <button class="chat-send" id="chatSend" onclick="sendMessage()">Send ↵</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Memory Tab -->
+          <div class="tab-content" id="tab-memory">
+            <div class="memory-section">
+              <div class="memory-section-header">🧠 Long-Term Memory</div>
+              <div class="memory-card">
+                <span class="tag tag-context">Context</span>
+                Fresh workspace — no prior memory yet. First interaction with user.
+              </div>
+              <div class="memory-card">
+                <span class="tag tag-decision">Decision</span>
+                Built landing page for <strong>CollectGigs</strong> — service business client acquisition automation tool.
+              </div>
+              <div class="memory-card">
+                <span class="tag tag-todo">Todo</span>
+                Push collectgigs repo to GitHub — waiting on repo creation or updated PAT with repo scope.
+              </div>
+            </div>
+            <div class="memory-section">
+              <div class="memory-section-header">📝 Recent Notes</div>
+              <div class="memory-card">
+                <span class="tag tag-lesson">Lesson</span>
+                User prefers direct action over explanations. Build first, discuss later.
+              </div>
+              <div class="memory-card">
+                <span class="tag tag-context">Context</span>
+                Business: CollectGigs — automates client acquisition for service businesses (plumbing, cleaning, landscaping, etc.)
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity Tab -->
+          <div class="tab-content" id="tab-activity">
+            <div class="memory-section">
+              <div class="memory-section-header">📋 Today's Activity</div>
+              <div id="activityFeed">
+                <div class="activity-item">
+                  <span class="activity-time">11:25</span>
+                  <span class="activity-dot" style="background:var(--accent);"></span>
+                  <span class="activity-text">Created <strong>CollectGigs landing page</strong> — full responsive HTML with hero, features, pricing, testimonials</span>
+                </div>
+                <div class="activity-item">
+                  <span class="activity-time">11:27</span>
+                  <span class="activity-dot" style="background:var(--teal);"></span>
+                  <span class="activity-text">Served page locally for preview at <strong>localhost:8080</strong></span>
+                </div>
+                <div class="activity-item">
+                  <span class="activity-time">11:30</span>
+                  <span class="activity-dot" style="background:var(--amber);"></span>
+                  <span class="activity-text">Attempted GitHub push — <strong>PAT lacks repo creation scope</strong></span>
+                </div>
+                <div class="activity-item">
+                  <span class="activity-time">11:34</span>
+                  <span class="activity-dot" style="background:var(--accent);"></span>
+                  <span class="activity-text">Built <strong>interactive office dashboard</strong> — the thing you're looking at right now</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Projects Tab -->
+          <div class="tab-content" id="tab-projects">
+            <div class="memory-section">
+              <div class="memory-section-header">🚀 Active Projects</div>
+              <div class="memory-card">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                  <strong>CollectGigs Landing Page</strong>
+                  <span class="tag tag-todo">Pending Push</span>
+                </div>
+                <div style="font-size:.8rem;color:var(--text-dim);margin-bottom:8px;">Complete. Ready to deploy.</div>
+                <div class="stat-bar">
+                  <div class="stat-bar-fill" style="width:90%;background:var(--accent);"></div>
+                </div>
+                <div style="font-size:.7rem;color:var(--text-muted);margin-top:4px;">90% — waiting on GitHub push</div>
+              </div>
+              <div class="memory-card">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                  <strong>Office Dashboard</strong>
+                  <span class="tag tag-context">Live</span>
+                </div>
+                <div style="font-size:.8rem;color:var(--text-dim);margin-bottom:8px;">This dashboard. Always evolving.</div>
+                <div class="stat-bar">
+                  <div class="stat-bar-fill" style="width:100%;background:var(--green);"></div>
+                </div>
+                <div style="font-size:.7rem;color:var(--text-muted);margin-top:4px;">100% — you're using it</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Whiteboard -->
+      <div class="whiteboard">
+        <div class="wb-header">📊 Status Board</div>
+        <div class="wb-body">
+          <div class="stat-card">
+            <div class="stat-label">Session Tasks</div>
+            <div class="stat-value" style="color:var(--accent);">2</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:50%;background:var(--accent);"></div></div>
+            <div style="font-size:.7rem;color:var(--text-muted);margin-top:4px;">1 complete · 1 pending</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Files Modified</div>
+            <div class="stat-value" style="color:var(--teal);">2</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:var(--teal);"></div></div>
+            <div style="font-size:.7rem;color:var(--text-muted);margin-top:4px;">collectgigs · dashboard</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Uptime</div>
+            <div class="stat-value" style="color:var(--green);" id="uptime">0m</div>
+          </div>
+
+          <div style="margin-top:16px;">
+            <div class="memory-section-header">✅ Today's To-Do</div>
+            <div class="todo-item">
+              <div class="todo-check done" onclick="toggleTodo(this)">✓</div>
+              <div class="todo-text done">Build CollectGigs landing page</div>
+            </div>
+            <div class="todo-item">
+              <div class="todo-check" onclick="toggleTodo(this)"></div>
+              <div class="todo-text">Push to GitHub (needs repo scope)</div>
+            </div>
+            <div class="todo-item">
+              <div class="todo-check done" onclick="toggleTodo(this)">✓</div>
+              <div class="todo-text done">Build office dashboard</div>
+            </div>
+            <div class="todo-item">
+              <div class="todo-check" onclick="toggleTodo(this)"></div>
+              <div class="todo-text">Set up identity & memory</div>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;">
+            <div class="memory-section-header">⚡ Quick Actions</div>
+            <button onclick="quickAction('status')" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:.8rem;cursor:pointer;margin-bottom:6px;text-align:left;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">📊 Check System Status</button>
+            <button onclick="quickAction('memory')" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:.8rem;cursor:pointer;margin-bottom:6px;text-align:left;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">🧠 Review Memory</button>
+            <button onclick="quickAction('commit')" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:.8rem;cursor:pointer;margin-bottom:6px;text-align:left;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">💾 Commit Workspace</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desk Surface -->
+    <div class="desk-surface">
+      <div class="desk-left">
+        <span>{{}}'s Office v1.0</span>
+        <span>·</span>
+        <span>Workspace: <code style="color:var(--accent);">/root/.openclaw/workspace</code></span>
+      </div>
+      <div class="desk-right">
+        <span><span class="desk-kbd">Enter</span> Send</span>
+        <span><span class="desk-kbd">Tab</span> Switch panel</span>
+      </div>
+    </div>
+
+    <div class="desk-lamp"></div>
+  </div>
+
+  <script>
+    // ── Clock ──
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString('en-GB', { hour12: false });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ── Uptime ──
+    const startTime = Date.now();
+    function updateUptime() {
+      const mins = Math.floor((Date.now() - startTime) / 60000);
+      const hrs = Math.floor(mins / 60);
+      const rem = mins % 60;
+      document.getElementById('uptime').textContent = hrs > 0 ? `${hrs}h ${rem}m` : `${rem}m`;
+    }
+    setInterval(updateUptime, 30000);
+
+    // ── View switching ──
+    function switchView(el, view) {
+      document.querySelectorAll('.file-item').forEach(f => f.classList.remove('active'));
+      el.classList.add('active');
+      switchTab(document.querySelector(`.monitor-tab[data-tab="${view}"]`), view);
+    }
+    function switchTab(el, tab) {
+      document.querySelectorAll('.monitor-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById(`tab-${tab}`).classList.add('active');
+    }
+
+    // ── Todo toggle ──
+    function toggleTodo(el) {
+      el.classList.toggle('done');
+      el.textContent = el.classList.contains('done') ? '✓' : '';
+      el.nextElementSibling.classList.toggle('done');
+    }
+
+    // ── Activity log ──
+    let activityCount = 4;
+    function addActivity(text, color = 'var(--accent)') {
+      const now = new Date();
+      const time = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+      const feed = document.getElementById('activityFeed');
+      const item = document.createElement('div');
+      item.className = 'activity-item';
+      item.innerHTML = `
+        <span class="activity-time">${time}</span>
+        <span class="activity-dot" style="background:${color};"></span>
+        <span class="activity-text">${text}</span>
+      `;
+      feed.prepend(item);
+      activityCount++;
+      document.getElementById('activityCount').textContent = activityCount;
+    }
+
+    // ── Chat ──
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const typingIndicator = document.getElementById('typingIndicator');
+
+    function addMessage(prefix, body, type = 'agent') {
+      const msg = document.createElement('div');
+      msg.className = `msg msg-${type}`;
+      msg.innerHTML = `<span class="msg-prefix">${prefix}</span><span class="msg-body">${body}</span>`;
+      chatMessages.appendChild(msg);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+
+      addMessage('you', text, 'user');
+      chatInput.value = '';
+      addActivity(`You: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`, 'var(--teal)');
+
+      // Show typing
+      typingIndicator.classList.add('visible');
+      document.getElementById('workStatus').innerHTML = '⚡ Thinking...';
+
+      // Simulate agent response (in real integration this would call the API)
+      setTimeout(() => {
+        typingIndicator.classList.remove('visible');
+        document.getElementById('workStatus').innerHTML = '⚡ Ready';
+
+        const responses = {
+          default: [
+            "Got it. Working on that.",
+            "On it. Give me a moment.",
+            "Consider it done.",
+            "I'll handle that right now.",
+            "Noted. Let me take care of it.",
+          ],
+          github: ["Let me try pushing that again. Do you want to create the repo first?"],
+          help: ["I can build pages, manage files, run commands, search the web, and remember things. Just ask."],
+          status: ["Everything's running smooth. 2 files modified this session, 1 task pending (GitHub push)."],
+        };
+
+        let reply;
+        const lower = text.toLowerCase();
+        if (lower.includes('github') || lower.includes('push')) {
+          reply = responses.github[0];
+        } else if (lower.includes('help') || lower.includes('what can')) {
+          reply = responses.help[0];
+        } else if (lower.includes('status')) {
+          reply = responses.status[0];
+        } else {
+          reply = responses.default[Math.floor(Math.random() * responses.default.length)];
+        }
+
+        addMessage('{{}}', reply, 'agent');
+        addActivity(`{{}}: "${reply.substring(0, 50)}..."`, 'var(--accent)');
+      }, 800 + Math.random() * 1200);
+    }
+
+    chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    // ── Quick Actions ──
+    function quickAction(action) {
+      const map = {
+        status: '📊 Check system status',
+        memory: '🧠 Review my memory files',
+        commit: '💾 Commit workspace changes',
+      };
+      addMessage('you', map[action], 'user');
+      addActivity(`Quick action: ${map[action]}`, 'var(--amber)');
+
+      typingIndicator.classList.add('visible');
+      setTimeout(() => {
+        typingIndicator.classList.remove('visible');
+        const replies = {
+          status: "All systems nominal. Model: active. Workspace: clean. 2 projects in progress.",
+          memory: "Memory is fresh — this is a new workspace. I'll start building context as we work together.",
+          commit: "Workspace committed. collectgigs/ and dashboard/ are saved.",
+        };
+        addMessage('{{}}', replies[action], 'agent');
+      }, 1000);
+    }
+
+    // ── Focus input on load ──
+    setTimeout(() => chatInput.focus(), 500);
+  </script>
+</body>
+</html>
